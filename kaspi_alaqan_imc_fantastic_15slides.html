@@ -1,0 +1,722 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700&family=Inter:wght@400;500&display=swap');
+  :root { --kaspi-red: #E8001D; --slide-radius: 16px; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', sans-serif; background: transparent; color: var(--color-text-primary); }
+  .deck-wrap { max-width: 700px; padding: 0.5rem 0 2rem; }
+  .slide-nav { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1rem; margin-bottom: 1rem; background: var(--color-background-secondary); border-radius: var(--border-radius-lg); border: 0.5px solid var(--color-border-tertiary); }
+  .slide-counter { font-size: 13px; color: var(--color-text-secondary); white-space: nowrap; }
+  .slide-dots { display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; flex: 1; margin: 0 10px; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--color-border-secondary); cursor: pointer; transition: all 0.2s; flex-shrink: 0; }
+  .dot.active { background: var(--kaspi-red); width: 18px; border-radius: 4px; }
+  .nav-btns { display: flex; gap: 8px; }
+  .nav-btn { background: transparent; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); padding: 6px 14px; font-size: 13px; cursor: pointer; color: var(--color-text-primary); font-family: 'Inter', sans-serif; }
+  .nav-btn:hover { background: var(--color-background-secondary); }
+  .nav-btn:disabled { opacity: 0.3; cursor: default; }
+  .slide { display: none; border-radius: var(--slide-radius); border: 0.5px solid var(--color-border-tertiary); background: var(--color-background-primary); overflow: hidden; min-height: 420px; }
+  .slide.active { display: block; }
+  .slide-header { padding: 1.4rem 1.75rem 1.1rem; border-bottom: 0.5px solid var(--color-border-tertiary); display: flex; align-items: flex-start; gap: 1rem; }
+  .slide-num { font-family: 'Unbounded', sans-serif; font-size: 10px; font-weight: 700; color: var(--kaspi-red); background: #FFF0F2; padding: 3px 8px; border-radius: 20px; white-space: nowrap; margin-top: 3px; letter-spacing: 0.05em; }
+  .slide-title { font-family: 'Unbounded', sans-serif; font-size: 16px; font-weight: 700; color: var(--color-text-primary); line-height: 1.35; }
+  .slide-sub { font-size: 12px; color: var(--color-text-secondary); margin-top: 4px; }
+  .slide-body { padding: 1.4rem 1.75rem; }
+  .tag { font-size: 12px; padding: 4px 11px; border-radius: 20px; font-weight: 500; line-height: 1.4; }
+  .tag-red { background: #FFF0F2; color: #C8001A; }
+  .tag-blue { background: #E6F1FB; color: #185FA5; }
+  .tag-green { background: #EAF3DE; color: #3B6D11; }
+  .tag-amber { background: #FAEEDA; color: #854F0B; }
+  .tag-purple { background: #EEEDFE; color: #534AB7; }
+  .tag-gray { background: var(--color-background-secondary); color: var(--color-text-secondary); }
+  .tag-row { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 0.875rem; }
+  .kv { display: flex; flex-direction: column; gap: 0.65rem; }
+  .kv-row { display: flex; align-items: flex-start; gap: 12px; padding: 0.8rem 1rem; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-tertiary); background: var(--color-background-secondary); }
+  .kv-icon { font-size: 17px; color: var(--kaspi-red); flex-shrink: 0; margin-top: 1px; }
+  .kv-label { font-size: 11px; color: var(--color-text-secondary); margin-bottom: 2px; }
+  .kv-val { font-size: 13px; font-weight: 500; color: var(--color-text-primary); line-height: 1.5; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 0.875rem; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.7rem; }
+  .card-sm { background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 0.8rem 0.875rem; }
+  .card-sm h4 { font-size: 11px; color: var(--color-text-secondary); margin-bottom: 5px; font-weight: 500; }
+  .card-sm p { font-size: 12px; color: var(--color-text-primary); line-height: 1.5; }
+  .accent-card { border-left: 3px solid var(--kaspi-red); background: var(--color-background-secondary); border-radius: 0 var(--border-radius-md) var(--border-radius-md) 0; border-top: 0.5px solid var(--color-border-tertiary); border-right: 0.5px solid var(--color-border-tertiary); border-bottom: 0.5px solid var(--color-border-tertiary); padding: 0.8rem 1rem; margin-bottom: 0.65rem; }
+  .accent-card strong { font-size: 13px; font-weight: 500; display: block; margin-bottom: 4px; }
+  .accent-card span { font-size: 12px; color: var(--color-text-secondary); line-height: 1.55; }
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.7rem; margin-bottom: 0.875rem; }
+  .stat-card { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 0.8rem 1rem; text-align: center; }
+  .stat-num { font-family: 'Unbounded', sans-serif; font-size: 20px; font-weight: 700; color: var(--kaspi-red); line-height: 1; }
+  .stat-lbl { font-size: 11px; color: var(--color-text-secondary); margin-top: 4px; line-height: 1.4; }
+  .timeline { display: flex; flex-direction: column; }
+  .tl-item { display: flex; gap: 12px; }
+  .tl-left { display: flex; flex-direction: column; align-items: center; }
+  .tl-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--kaspi-red); flex-shrink: 0; margin-top: 4px; }
+  .tl-line { width: 1px; background: var(--color-border-tertiary); flex: 1; margin: 3px 0; min-height: 16px; }
+  .tl-content { padding-bottom: 0.875rem; flex: 1; }
+  .tl-time { font-size: 11px; color: var(--kaspi-red); font-weight: 500; margin-bottom: 2px; }
+  .tl-text { font-size: 12px; color: var(--color-text-primary); line-height: 1.5; }
+  .platform-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; }
+  .platform-card { border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 0.8rem 0.875rem; background: var(--color-background-primary); }
+  .platform-top { display: flex; align-items: center; gap: 9px; margin-bottom: 7px; }
+  .platform-icon { font-size: 18px; color: var(--kaspi-red); }
+  .platform-name { font-size: 13px; font-weight: 500; }
+  .platform-pct { font-size: 11px; color: var(--color-text-secondary); }
+  .bar-wrap { background: var(--color-border-tertiary); border-radius: 3px; height: 4px; margin-top: 6px; }
+  .bar-fill { height: 4px; border-radius: 3px; background: var(--kaspi-red); }
+  .wwh-row { display: grid; grid-template-columns: 62px 1fr; gap: 12px; align-items: start; padding: 0.8rem 1rem; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-tertiary); background: var(--color-background-secondary); margin-bottom: 0.65rem; }
+  .wwh-letter { font-family: 'Unbounded', sans-serif; font-size: 28px; font-weight: 700; color: var(--kaspi-red); line-height: 1; }
+  .wwh-title { font-size: 13px; font-weight: 500; margin-bottom: 3px; }
+  .wwh-body { font-size: 12px; color: var(--color-text-secondary); line-height: 1.5; }
+  .slogan-box { background: var(--kaspi-red); border-radius: var(--border-radius-lg); padding: 1.35rem 1.6rem; color: white; text-align: center; margin-bottom: 0.875rem; }
+  .slogan-kz { font-size: 10px; opacity: 0.75; letter-spacing: 0.08em; margin-bottom: 5px; text-transform: uppercase; }
+  .slogan-main { font-family: 'Unbounded', sans-serif; font-size: 20px; font-weight: 700; line-height: 1.3; margin-bottom: 7px; }
+  .slogan-en { font-size: 12px; opacity: 0.85; }
+  .progress-row { display: flex; align-items: center; gap: 10px; margin-bottom: 0.65rem; }
+  .prog-label { font-size: 12px; min-width: 85px; color: var(--color-text-secondary); }
+  .prog-bar { flex: 1; background: var(--color-border-tertiary); height: 5px; border-radius: 3px; }
+  .prog-fill { height: 5px; border-radius: 3px; background: var(--kaspi-red); }
+  .prog-pct { font-size: 12px; font-weight: 500; min-width: 36px; text-align: right; }
+  .archetype-badge { display: inline-block; font-family: 'Unbounded', sans-serif; font-size: 18px; font-weight: 700; color: var(--kaspi-red); border: 2px solid var(--kaspi-red); border-radius: 12px; padding: 10px 24px; margin: 0.65rem 0; }
+  .competitor-row { display: grid; grid-template-columns: 1fr auto 1fr; gap: 0.875rem; align-items: center; margin-bottom: 0.875rem; }
+  .comp-card { padding: 0.875rem; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-tertiary); }
+  .comp-label { font-size: 11px; color: var(--color-text-secondary); margin-bottom: 5px; font-weight: 500; }
+  .comp-name { font-size: 13px; font-weight: 500; margin-bottom: 5px; }
+  .comp-msg { font-size: 12px; color: var(--color-text-secondary); font-style: italic; line-height: 1.5; }
+  .vs-badge { font-family: 'Unbounded', sans-serif; font-size: 13px; font-weight: 700; color: var(--color-text-secondary); text-align: center; }
+  .member-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-top: 1rem; }
+  .member-card { display: flex; align-items: center; gap: 12px; padding: 0.875rem 1rem; background: var(--color-background-secondary); border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-tertiary); }
+  .avatar { width: 40px; height: 40px; border-radius: 50%; background: #FFF0F2; display: flex; align-items: center; justify-content: center; font-family: 'Unbounded', sans-serif; font-size: 13px; font-weight: 700; color: var(--kaspi-red); flex-shrink: 0; }
+  .member-name { font-size: 13px; font-weight: 500; line-height: 1.3; }
+  .member-role { font-size: 11px; color: var(--color-text-secondary); margin-top: 2px; }
+</style>
+
+<h2 class="sr-only">Kaspi Alaqan IMC Strategy — 15 slides by Team FANTAstic. Covers brand archetype, target audience portrait, behavioral profile, media habits, creative message, channel plan, influencer strategy, 18-month timeline, KPIs, and conclusion.</h2>
+
+<div class="deck-wrap">
+  <div class="slide-nav">
+    <div class="slide-counter"><span id="cur">1</span>/<span id="tot">15</span></div>
+    <div class="slide-dots" id="dots"></div>
+    <div class="nav-btns">
+      <button class="nav-btn" id="prev" onclick="go(-1)" disabled>← Prev</button>
+      <button class="nav-btn" id="next" onclick="go(1)">Next →</button>
+    </div>
+  </div>
+
+  <div id="slides">
+
+    <!-- SLIDE 1: TITLE PAGE -->
+    <div class="slide active">
+      <div style="background: var(--kaspi-red); border-radius: var(--slide-radius); padding: 2.5rem 2rem; color: white; min-height: 420px; display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+          <div style="font-size: 10px; letter-spacing: 0.15em; opacity: 0.7; text-transform: uppercase; margin-bottom: 0.5rem; font-weight: 500;">Integrated Marketing Communication Strategy · 2026</div>
+          <div style="font-family: 'Unbounded', sans-serif; font-size: 28px; font-weight: 700; line-height: 1.2; margin-bottom: 0.75rem;">Kaspi Alaqan<br>IMC Campaign</div>
+          <div style="font-family: 'Unbounded', sans-serif; font-size: 15px; font-weight: 400; opacity: 0.85; margin-bottom: 1.25rem; font-style: italic;">"Everything is in your palm"</div>
+          <div style="font-size: 13px; opacity: 0.85; line-height: 1.65; max-width: 480px;">A full omni-channel Integrated Marketing Communication strategy for the launch of Kazakhstan's first pay-by-palm payment service. 18-month plan across digital, offline, influencer and owned media channels.</div>
+        </div>
+        <div>
+          <div style="border-top: 1px solid rgba(255,255,255,0.25); padding-top: 1.25rem; margin-top: 1.5rem;">
+            <div style="font-size: 10px; letter-spacing: 0.12em; opacity: 0.6; text-transform: uppercase; margin-bottom: 0.875rem;">Presented by</div>
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 0.6rem;">
+              <div style="background: rgba(255,255,255,0.2); border-radius: 20px; padding: 4px 14px; font-size: 12px; font-weight: 500;">Team FANTAstic</div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px 20px;">
+              <div style="font-size: 12px; opacity: 0.9;">· Indira Amanova</div>
+              <div style="font-size: 12px; opacity: 0.9;">· Meruyert Abdullina</div>
+              <div style="font-size: 12px; opacity: 0.9;">· Aisha Maden</div>
+              <div style="font-size: 12px; opacity: 0.9;">· Arailym Bakytzhankyzy</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: AGENDA -->
+    <div class="slide">
+      <div class="slide-header">
+        <div class="slide-num">00 · AGENDA</div>
+        <div>
+          <div class="slide-title">Presentation structure</div>
+          <div class="slide-sub">What we will cover across 15 slides</div>
+        </div>
+      </div>
+      <div class="slide-body">
+        <div class="two-col">
+          <div class="kv" style="gap:0.5rem;">
+            <div class="kv-row"><div class="kv-icon" style="font-size:14px; min-width:22px; text-align:center; font-family:'Unbounded',sans-serif; font-weight:700;">01</div><div><div class="kv-label">Slide 2</div><div class="kv-val" style="font-size:13px;">Brand overview — what is Kaspi Alaqan?</div></div></div>
+            <div class="kv-row"><div class="kv-icon" style="font-size:14px; min-width:22px; text-align:center; font-family:'Unbounded',sans-serif; font-weight:700;">02</div><div><div class="kv-label">Slide 3</div><div class="kv-val" style="font-size:13px;">Brand archetype & tone of voice</div></div></div>
+            <div class="kv-row"><div class="kv-icon" style="font-size:14px; min-width:22px; text-align:center; font-family:'Unbounded',sans-serif; font-weight:700;">03</div><div><div class="kv-label">Slide 4</div><div class="kv-val" style="font-size:13px;">Target audience portrait — Core & Potential</div></div></div>
+            <div class="kv-row"><div class="kv-icon" style="font-size:14px; min-width:22px; text-align:center; font-family:'Unbounded',sans-serif; font-weight:700;">04</div><div><div class="kv-label">Slide 5</div><div class="kv-val" style="font-size:13px;">Behavioral profile & a day in the life</div></div></div>
+            <div class="kv-row"><div class="kv-icon" style="font-size:14px; min-width:22px; text-align:center; font-family:'Unbounded',sans-serif; font-weight:700;">05</div><div><div class="kv-label">Slide 6</div><div class="kv-val" style="font-size:13px;">TA media habits & consumption</div></div></div>
+            <div class="kv-row"><div class="kv-icon" style="font-size:14px; min-width:22px; text-align:center; font-family:'Unbounded',sans-serif; font-weight:700;">06</div><div><div class="kv-label">Slide 7</div><div class="kv-val" style="font-size:13px;">Competitor analysis & positioning</div></div></div>
+            <div class="kv-row"><div class="kv-icon" style="font-size:14px; min-width:22px; text-align:center; font-family:'Unbounded',sans-serif; font-weight:700;">07</div><div><div class="kv-label">Slide 8</div><div class="kv-val" style="font-size:13px;">Creative message & slogan — WWH approach</div></div></div>
+          </div>
+          <div class="kv" style="gap:0.5rem;">
+            <div class="kv-row"><div class="kv-icon" style="font-size:14px; min-width:22px; text-align:center; font-family:'Unbounded',sans-serif; font-weight:700;">08</div><div><div class="kv-label">Slide 9</div><div class="kv-val" style="font-size:13px;">Channel plan — digital & offline</div></div></div>
+            <div class="kv-row"><div class="kv-icon" style="font-size:14px; min-width:22px; text-align:center; font-family:'Unbounded',sans-serif; font-weight:700;">09</div><div><div class="kv-label">Slide 10</div><div class="kv-val" style="font-size:13px;">Micro-influencer strategy</div></div></div>
+            <div class="kv-row"><div class="kv-icon" style="font-size:14px; min-width:22px; text-align:center; font-family:'Unbounded',sans-serif; font-weight:700;">10</div><div><div class="kv-label">Slide 11</div><div class="kv-val" style="font-size:13px;">Integration type & 18-month timeline</div></div></div>
+            <div class="kv-row"><div class="kv-icon" style="font-size:14px; min-width:22px; text-align:center; font-family:'Unbounded',sans-serif; font-weight:700;">11</div><div><div class="kv-label">Slide 12</div><div class="kv-val" style="font-size:13px;">Consistency check across channels</div></div></div>
+            <div class="kv-row"><div class="kv-icon" style="font-size:14px; min-width:22px; text-align:center; font-family:'Unbounded',sans-serif; font-weight:700;">12</div><div><div class="kv-label">Slide 13</div><div class="kv-val" style="font-size:13px;">KPIs & success metrics</div></div></div>
+            <div class="kv-row"><div class="kv-icon" style="font-size:14px; min-width:22px; text-align:center; font-family:'Unbounded',sans-serif; font-weight:700;">13</div><div><div class="kv-label">Slide 14</div><div class="kv-val" style="font-size:13px;">Meet the team — Team FANTAstic</div></div></div>
+            <div class="kv-row"><div class="kv-icon" style="font-size:14px; min-width:22px; text-align:center; font-family:'Unbounded',sans-serif; font-weight:700;">14</div><div><div class="kv-label">Slide 15</div><div class="kv-val" style="font-size:13px;">Conclusion & key takeaways</div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: BRAND BRIEF -->
+    <div class="slide">
+      <div class="slide-header">
+        <div class="slide-num">01 · BRAND</div>
+        <div>
+          <div class="slide-title">What is Kaspi Alaqan?</div>
+          <div class="slide-sub">Product truth, innovation context & launch facts</div>
+        </div>
+      </div>
+      <div class="slide-body">
+        <div class="kv">
+          <div class="kv-row">
+            <i class="ti ti-hand-finger kv-icon" aria-hidden="true"></i>
+            <div><div class="kv-label">Product essence</div><div class="kv-val">Pay-by-palm — pay with your hand, no card, no phone, no internet connection required. First of its kind in Central Asia.</div></div>
+          </div>
+          <div class="kv-row">
+            <i class="ti ti-shield-check kv-icon" aria-hidden="true"></i>
+            <div><div class="kv-label">Security & certification</div><div class="kv-val">Certified by Kazakhstan's Agency for Financial Market Regulation. Independent lab tests covering network security, integrity, availability and confidentiality.</div></div>
+          </div>
+          <div class="kv-row">
+            <i class="ti ti-map-pin kv-icon" aria-hidden="true"></i>
+            <div><div class="kv-label">Rollout plan</div><div class="kv-val">December 2025 — Almaty. 2026 — nationwide. Terminals free for merchants. 0% commission for first 3 months, then Kaspi Pay standard rate.</div></div>
+          </div>
+          <div class="kv-row">
+            <i class="ti ti-globe kv-icon" aria-hidden="true"></i>
+            <div><div class="kv-label">Global context</div><div class="kv-val">Technology proven in Japan 10+ years. Amazon One (USA), Alipay Palm (China). Kazakhstan is the first in the entire CIS region to launch at scale.</div></div>
+          </div>
+          <div class="kv-row">
+            <i class="ti ti-flag kv-icon" aria-hidden="true"></i>
+            <div><div class="kv-label">Strategic importance</div><div class="kv-val">Aligned with Kazakhstan's national goal of a $450B GDP by 2029. Digital technologies like Alaqan are central to reaching this goal per government roadmap.</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 4: ARCHETYPE -->
+    <div class="slide">
+      <div class="slide-header">
+        <div class="slide-num">02 · ARCHETYPE</div>
+        <div>
+          <div class="slide-title">Brand archetype & tone of voice</div>
+          <div class="slide-sub">Foundation for consistent integration across every channel</div>
+        </div>
+      </div>
+      <div class="slide-body">
+        <div style="text-align:center; padding: 0.75rem 0 0.5rem;">
+          <div style="font-size:12px; color:var(--color-text-secondary); margin-bottom:4px;">Primary archetype</div>
+          <div class="archetype-badge">THE INNOVATOR</div>
+          <div style="font-size:12px; color:var(--color-text-secondary); margin-top:4px; margin-bottom:1rem;">Secondary: The Everyman — democratizing frontier tech for every Kazakhstani</div>
+        </div>
+        <div class="three-col" style="margin-bottom:0.875rem;">
+          <div class="card-sm"><h4>Brand voice</h4><p>Confident, plain-spoken, inspiring. Zero tech jargon. Like a smart friend, not a corporate announcement.</p></div>
+          <div class="card-sm"><h4>Tone</h4><p>Modern, warm, bold. Kazakhstani spirit at global standards. Proud but never arrogant.</p></div>
+          <div class="card-sm"><h4>Core values</h4><p>Freedom. Security. Simplicity. Kazakhstani pride. The future — right now, not someday.</p></div>
+        </div>
+        <div class="accent-card">
+          <strong>Key association to build across all integrations</strong>
+          <span>"Your palm is your new wallet." Alaqan = freedom from all physical constraints. We don't make payments more convenient — we eliminate the barrier between a person and their money entirely.</span>
+        </div>
+        <div class="accent-card">
+          <strong>How to reach TOM (Top of Mind)</strong>
+          <span>Repeat the open-palm gesture in every single channel. One unified visual symbol — the open hand — from OOH billboards to TikTok clips. Frequency target: 7+ brand touchpoints per month with core TA to lock in recall.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 5: TA PORTRAIT -->
+    <div class="slide">
+      <div class="slide-header">
+        <div class="slide-num">03 · TARGET AUDIENCE</div>
+        <div>
+          <div class="slide-title">TA portrait: Core & Potential</div>
+          <div class="slide-sub">Socio-demographic profile · income level · lifestyle segmentation</div>
+        </div>
+      </div>
+      <div class="slide-body">
+        <div class="two-col" style="margin-bottom:0.875rem;">
+          <div>
+            <div class="tag tag-red" style="margin-bottom:9px; display:inline-block;">CORE TA</div>
+            <div class="kv" style="gap:0.5rem;">
+              <div class="kv-row"><i class="ti ti-user kv-icon" aria-hidden="true"></i><div><div class="kv-label">Profile</div><div class="kv-val">25–38 years, Almaty / Astana, active urban dweller</div></div></div>
+              <div class="kv-row"><i class="ti ti-briefcase kv-icon" aria-hidden="true"></i><div><div class="kv-label">Job & income</div><div class="kv-val">IT, finance, HoReCa specialist. Income: 350K–900K KZT/month (~$700–$1,800)</div></div></div>
+              <div class="kv-row"><i class="ti ti-clock kv-icon" aria-hidden="true"></i><div><div class="kv-label">Core value</div><div class="kv-val">Time is their #1 resource. Optimizes every moment for speed and seamlessness.</div></div></div>
+            </div>
+          </div>
+          <div>
+            <div class="tag tag-blue" style="margin-bottom:9px; display:inline-block;">POTENTIAL TA</div>
+            <div class="kv" style="gap:0.5rem;">
+              <div class="kv-row"><i class="ti ti-users kv-icon" aria-hidden="true"></i><div><div class="kv-label">Profile</div><div class="kv-val">18–24 Gen Z students and 38–50 family-oriented upper middle class</div></div></div>
+              <div class="kv-row"><i class="ti ti-building kv-icon" aria-hidden="true"></i><div><div class="kv-label">Job & income</div><div class="kv-val">Students (stipend + part-time) and senior managers (900K+ KZT/month)</div></div></div>
+              <div class="kv-row"><i class="ti ti-sparkles kv-icon" aria-hidden="true"></i><div><div class="kv-label">Motivator</div><div class="kv-val">Novelty, status of being "first" and social proof from their immediate circle.</div></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="accent-card">
+          <strong>Core TA key insight — "Velocity-driven citizens"</strong>
+          <span>They optimize every single moment. Spending 30 seconds paying for coffee is already too long. A forgotten phone at home is a catastrophe. Alaqan removes this pain forever — their palm is always with them.</span>
+        </div>
+        <div class="tag-row">
+          <span class="tag tag-gray">Digital native</span>
+          <span class="tag tag-gray">Active Kaspi Pay user</span>
+          <span class="tag tag-gray">Shops online 3+ times/week</span>
+          <span class="tag tag-gray">Netflix, Spotify subscriber</span>
+          <span class="tag tag-gray">Lives in top 1–2 KZ cities</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 6: DAY IN LIFE -->
+    <div class="slide">
+      <div class="slide-header">
+        <div class="slide-num">04 · BEHAVIORAL PROFILE</div>
+        <div>
+          <div class="slide-title">A day in the life</div>
+          <div class="slide-sub">User scenario · habits · behavioral patterns · Alaqan touchpoints</div>
+        </div>
+      </div>
+      <div class="slide-body">
+        <div class="timeline">
+          <div class="tl-item">
+            <div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div>
+            <div class="tl-content">
+              <div class="tl-time">07:00 — Wake up</div>
+              <div class="tl-text">First action: Kaspi App check — balance, notifications. Orders coffee via Glovo integrated into Kaspi. <span class="tag tag-red" style="font-size:11px; padding:2px 7px;">Alaqan moment: pays with palm, doesn't search for phone.</span></div>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div>
+            <div class="tl-content">
+              <div class="tl-time">08:30 — Commute (metro / ride-share)</div>
+              <div class="tl-text">Podcasts (tech, finance). Scrolls TikTok — catches trends. Sees a native Alaqan clip from a micro-influencer filmed at a real mall checkout queue.</div>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div>
+            <div class="tl-content">
+              <div class="tl-time">12:30 — Lunch at food court</div>
+              <div class="tl-text">Mega or Dostyk Plaza. Queue. Pays with palm — faster than colleagues with phones. <span class="tag tag-amber" style="font-size:11px; padding:2px 7px;">Demo moment: colleagues ask "wait — what was that?"</span></div>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div>
+            <div class="tl-content">
+              <div class="tl-time">18:00 — Gym then grocery store</div>
+              <div class="tl-text">Hands full — gym bag, water bottle. Pays at Magnum with palm instantly. This exact moment is where loyalty is truly formed.</div>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-left"><div class="tl-dot"></div><div class="tl-line" style="min-height:0"></div></div>
+            <div class="tl-content">
+              <div class="tl-time">21:00 — Evening at home</div>
+              <div class="tl-text">Instagram Reels, YouTube Shorts. Sees Alaqan retargeting banner. Posts a Story: "tried Alaqan today — this is literally the future." Organic UGC generated at zero cost.</div>
+            </div>
+          </div>
+        </div>
+        <div class="accent-card" style="margin-top:0.65rem;">
+          <strong>Key behavioral insight</strong>
+          <span>Core TA already uses Kaspi Pay 4–7 times per week. Alaqan is not a new product — it's an upgrade to a habit that already exists. The barrier to entry is near-zero: registration happens inside the same familiar app they open every single day.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 7: MEDIA HABITS -->
+    <div class="slide">
+      <div class="slide-header">
+        <div class="slide-num">05 · MEDIA CONSUMPTION</div>
+        <div>
+          <div class="slide-title">TA media habits — detailed analysis</div>
+          <div class="slide-sub">Which platforms, at what time, and how content is chosen</div>
+        </div>
+      </div>
+      <div class="slide-body">
+        <div class="stat-grid" style="margin-bottom:0.875rem;">
+          <div class="stat-card"><div class="stat-num">86%</div><div class="stat-lbl">of KZ internet users reached by TikTok</div></div>
+          <div class="stat-card"><div class="stat-num">90%</div><div class="stat-lbl">of adults visit Instagram monthly</div></div>
+          <div class="stat-card"><div class="stat-num">56%</div><div class="stat-lbl">of all web traffic from mobile</div></div>
+          <div class="stat-card"><div class="stat-num">60%</div><div class="stat-lbl">of KZ population on Telegram</div></div>
+        </div>
+        <div style="margin-bottom:0.75rem;">
+          <div class="progress-row"><div class="prog-label">TikTok</div><div class="prog-bar"><div class="prog-fill" style="width:92%"></div></div><div class="prog-pct">16.9M</div></div>
+          <div class="progress-row"><div class="prog-label">Instagram</div><div class="prog-bar"><div class="prog-fill" style="width:78%"></div></div><div class="prog-pct">13.1M</div></div>
+          <div class="progress-row"><div class="prog-label">Telegram</div><div class="prog-bar"><div class="prog-fill" style="width:65%"></div></div><div class="prog-pct">~12M</div></div>
+          <div class="progress-row"><div class="prog-label">YouTube</div><div class="prog-bar"><div class="prog-fill" style="width:58%"></div></div><div class="prog-pct">~11M</div></div>
+          <div class="progress-row"><div class="prog-label">LinkedIn</div><div class="prog-bar"><div class="prog-fill" style="width:10%"></div></div><div class="prog-pct">1.9M</div></div>
+        </div>
+        <div class="two-col">
+          <div class="card-sm"><h4>Morning (07–10) — information mode</h4><p>Telegram channels: news, finance. Instagram Stories. Podcasts during commute — tech, business, lifestyle.</p></div>
+          <div class="card-sm"><h4>Midday (12–14) — entertainment mode</h4><p>TikTok during lunch. Short-form, trends, life hacks. Algorithm surfaces native content immediately with a strong first-3-second hook.</p></div>
+          <div class="card-sm"><h4>Evening (19–23) — deep consumption</h4><p>YouTube (reviews, tech, lifestyle). Instagram Reels. Long-form Telegram. Peak engagement — highest ad recall window of the day.</p></div>
+          <div class="card-sm"><h4>Content selection algorithm</h4><p>Trusts micro-influencers (10K–100K). Skips direct ads reflexively. UGC and native formats are the only keys that unlock genuine attention.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 8: COMPETITORS -->
+    <div class="slide">
+      <div class="slide-header">
+        <div class="slide-num">06 · COMPETITORS</div>
+        <div>
+          <div class="slide-title">Competitor analysis & positioning</div>
+          <div class="slide-sub">Communication tone review · what to mirror and what to avoid</div>
+        </div>
+      </div>
+      <div class="slide-body">
+        <div class="competitor-row">
+          <div class="comp-card">
+            <div class="comp-label">Nearest competitor</div>
+            <div class="comp-name">Halyk Bank / Pay</div>
+            <div class="comp-msg">"Reliable, proven, with you since 1923." Focus on institutional stability and trust. Traditional, conservative tone — safe but uninspiring.</div>
+          </div>
+          <div class="vs-badge">VS</div>
+          <div class="comp-card" style="border-color:var(--kaspi-red);">
+            <div class="comp-label" style="color:var(--kaspi-red);">Kaspi Alaqan</div>
+            <div class="comp-name">Freedom, no limits</div>
+            <div class="comp-msg">"The future is already in your palm." Innovative, bold, warm tone. Youthful energy + mass accessibility for every Kazakhstani.</div>
+          </div>
+        </div>
+        <div class="accent-card">
+          <strong>Second competitor: Apple Pay / Google Pay</strong>
+          <span>Global brand, requires a smartphone and internet connection at all times. Message: "premium digital lifestyle." Our edge: Alaqan works without phone and without any network signal — an entirely different category of freedom.</span>
+        </div>
+        <div class="accent-card">
+          <strong>What to avoid in our communication</strong>
+          <span>Don't copy Halyk's "reliability" narrative — that's institutional banking, not us. Never say "more convenient than a card" — Alaqan eliminates the need to carry anything at all. Avoid all technical jargon: "biometrics," "infrared scanning" belong in a white paper, not in advertising creative.</span>
+        </div>
+        <div class="tag-row" style="margin-bottom:0;">
+          <span class="tag tag-green">Our TOV: bold + warm + Kazakhstani</span>
+          <span class="tag tag-red">Avoid: "trusted bank" framing</span>
+          <span class="tag tag-amber">Avoid: "technology of the future"</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 9: CREATIVE MESSAGE -->
+    <div class="slide">
+      <div class="slide-header">
+        <div class="slide-num">07 · CREATIVE MESSAGE</div>
+        <div>
+          <div class="slide-title">Creative message & campaign slogan</div>
+          <div class="slide-sub">Big Idea · WWH approach · one unified message across all channels</div>
+        </div>
+      </div>
+      <div class="slide-body">
+        <div class="slogan-box">
+          <div class="slogan-kz">Kazakh / English · main campaign tagline</div>
+          <div class="slogan-main">"Алақандa бәрі бар"<br>/ "Everything is in your palm"</div>
+          <div class="slogan-en">Pay. Live. Be free. · Your palm is all you need.</div>
+        </div>
+        <div class="wwh-row">
+          <div class="wwh-letter">W</div>
+          <div><div class="wwh-title">WHO — who speaks and to whom</div><div class="wwh-body">Kaspi — the brand every Kazakhstani already trusts. Speaking to velocity-driven citizens 25–38 who treat every minute as currency. Tone: smart friend who gets it, not a corporate press release.</div></div>
+        </div>
+        <div class="wwh-row">
+          <div class="wwh-letter">W</div>
+          <div><div class="wwh-title">WHAT — what we say</div><div class="wwh-body">You are no longer tied to a card or a phone. Your palm is you. Alaqan is not a payment tool — it's an extension of your identity and your freedom. Safe, instant, and proudly made in Kazakhstan.</div></div>
+        </div>
+        <div class="wwh-row">
+          <div class="wwh-letter">H</div>
+          <div><div class="wwh-title">HOW — how and where we say it</div><div class="wwh-body">Through the "moment of surprise" — real people in real situations: hands full, no signal, running late. Native UGC style on TikTok and Instagram. Outdoor at high-traffic points. One unified visual: the open palm, in every channel, every time.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 10: CHANNEL PLAN -->
+    <div class="slide">
+      <div class="slide-header">
+        <div class="slide-num">08 · CHANNEL PLAN</div>
+        <div>
+          <div class="slide-title">Channel selection & integration</div>
+          <div class="slide-sub">Digital + offline · platforms chosen by audience fit and reach</div>
+        </div>
+      </div>
+      <div class="slide-body">
+        <div class="platform-grid">
+          <div class="platform-card">
+            <div class="platform-top"><i class="ti ti-brand-tiktok platform-icon" aria-hidden="true"></i><div><div class="platform-name">TikTok</div><div class="platform-pct">Primary · 16.9M users KZ</div></div></div>
+            <div style="font-size:12px; color:var(--color-text-secondary); line-height:1.5;">Native "Alaqan moment" clips. Micro-influencers 10K–100K (lifestyle, food, tech). In-Feed Ads. Format: 15–30 sec vertical video.</div>
+            <div class="bar-wrap"><div class="bar-fill" style="width:95%"></div></div>
+          </div>
+          <div class="platform-card">
+            <div class="platform-top"><i class="ti ti-brand-instagram platform-icon" aria-hidden="true"></i><div><div class="platform-name">Instagram</div><div class="platform-pct">Primary · 13.1M users KZ</div></div></div>
+            <div style="font-size:12px; color:var(--color-text-secondary); line-height:1.5;">Reels + Stories. Lifestyle blogger collabs. Targeted ads 25–38 segments. UGC reposts. Visual code: open palm on terminal.</div>
+            <div class="bar-wrap"><div class="bar-fill" style="width:85%"></div></div>
+          </div>
+          <div class="platform-card">
+            <div class="platform-top"><i class="ti ti-brand-telegram platform-icon" aria-hidden="true"></i><div><div class="platform-name">Telegram</div><div class="platform-pct">Secondary · 60% KZ population</div></div></div>
+            <div style="font-size:12px; color:var(--color-text-secondary); line-height:1.5;">Native posts in top Kazakh channels. Kaspi's owned Telegram channel. City-by-city rollout announcements.</div>
+            <div class="bar-wrap"><div class="bar-fill" style="width:70%"></div></div>
+          </div>
+          <div class="platform-card">
+            <div class="platform-top"><i class="ti ti-brand-youtube platform-icon" aria-hidden="true"></i><div><div class="platform-name">YouTube</div><div class="platform-pct">Awareness · pre-roll + long-form</div></div></div>
+            <div style="font-size:12px; color:var(--color-text-secondary); line-height:1.5;">6-sec non-skip pre-roll + 30-sec brand spot. Podcast integrations. Short documentary: "How Alaqan actually works."</div>
+            <div class="bar-wrap"><div class="bar-fill" style="width:65%"></div></div>
+          </div>
+          <div class="platform-card">
+            <div class="platform-top"><i class="ti ti-device-mobile platform-icon" aria-hidden="true"></i><div><div class="platform-name">Kaspi App</div><div class="platform-pct">Owned media · 13M+ users</div></div></div>
+            <div style="font-size:12px; color:var(--color-text-secondary); line-height:1.5;">Push notifications on city launch. Onboarding screen with registration. Homepage banner. Cashback offer for first Alaqan payment.</div>
+            <div class="bar-wrap"><div class="bar-fill" style="width:90%"></div></div>
+          </div>
+          <div class="platform-card">
+            <div class="platform-top"><i class="ti ti-ad platform-icon" aria-hidden="true"></i><div><div class="platform-name">OOH / Retail</div><div class="platform-pct">Offline · malls, metro, streets</div></div></div>
+            <div style="font-size:12px; color:var(--color-text-secondary); line-height:1.5;">Terminal branding at checkout. Digital OOH at mall entrances. "Alaqan accepted here" merchant stickers. POS materials at all locations.</div>
+            <div class="bar-wrap"><div class="bar-fill" style="width:75%"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 11: INFLUENCER STRATEGY -->
+    <div class="slide">
+      <div class="slide-header">
+        <div class="slide-num">09 · INFLUENCERS</div>
+        <div>
+          <div class="slide-title">Micro-influencer strategy</div>
+          <div class="slide-sub">Tiers, formats and roles within the IMC conversion funnel</div>
+        </div>
+      </div>
+      <div class="slide-body">
+        <div class="three-col" style="margin-bottom:0.875rem;">
+          <div class="card-sm"><h4>Nano (1K–10K)</h4><p>Neighbors, colleagues, students. Highest trust (ER 8–12%). Role: first-wave UGC "I tried it." Rewarded with product and cashback.</p></div>
+          <div class="card-sm"><h4>Micro (10K–100K)</h4><p>Almaty lifestyle, food, fitness creators. ER 4–7%. Format: "a day with Alaqan." The primary working layer of the entire campaign.</p></div>
+          <div class="card-sm"><h4>Macro (100K–500K)</h4><p>1–2 KOLs at launch for an awareness spike. Kazakh tech / lifestyle segment. Format: first-use unboxing and reaction.</p></div>
+        </div>
+        <div class="accent-card">
+          <strong>Content formats for influencers — "Moment of delight"</strong>
+          <span>Unexpected real-life situation → Alaqan solves it. Examples: "wet hands after the gym — not a problem," "left my phone at home — Alaqan saves the day," "checkout in 0 seconds while the queue stares." Campaign hashtag: #EverythingInYourPalm #KaspiAlaqan</span>
+        </div>
+        <div class="accent-card">
+          <strong>What to avoid in influencer content</strong>
+          <span>Direct "go buy this" ads. Competitor name-drops. Overly technical descriptions. Stock-footage shooting style — only authentic Almaty locations: real coffee shops, food courts, gyms, supermarkets. Audience immediately detects staged content.</span>
+        </div>
+        <div class="tag-row" style="margin-bottom:0;">
+          <span class="tag tag-purple">Food creators KZ</span>
+          <span class="tag tag-purple">Fitness / wellness</span>
+          <span class="tag tag-purple">Fintech / tech KZ</span>
+          <span class="tag tag-purple">Almaty lifestyle</span>
+          <span class="tag tag-purple">Young parents (potential TA)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 12: TIMELINE -->
+    <div class="slide">
+      <div class="slide-header">
+        <div class="slide-num">10 · INTEGRATION PLAN</div>
+        <div>
+          <div class="slide-title">Integration type & 18-month timeline</div>
+          <div class="slide-sub">Full omni-channel · long-term strategy Q1 2026 → Q2 2027</div>
+        </div>
+      </div>
+      <div class="slide-body">
+        <div class="stat-grid" style="margin-bottom:0.875rem;">
+          <div class="stat-card"><div class="stat-num">18</div><div class="stat-lbl">months of campaign</div></div>
+          <div class="stat-card"><div class="stat-num">3</div><div class="stat-lbl">integration phases</div></div>
+          <div class="stat-card"><div class="stat-num">7+</div><div class="stat-lbl">touchpoints / month</div></div>
+          <div class="stat-card"><div class="stat-num">5+</div><div class="stat-lbl">cities in rollout</div></div>
+        </div>
+        <div class="timeline">
+          <div class="tl-item">
+            <div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div>
+            <div class="tl-content">
+              <div class="tl-time">PHASE 1: LAUNCH · Q1 2026 — Almaty</div>
+              <div class="tl-text">Awareness spike: OOH + TikTok KOL + Kaspi App push campaign. Goal: 30% brand awareness among Almaty 25–38. Provocative OOH "Forget the card" at MEGA, Dostyk, City+ malls. PR launch event covered by tech and business media.</div>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-left"><div class="tl-dot"></div><div class="tl-line"></div></div>
+            <div class="tl-content">
+              <div class="tl-time">PHASE 2: GROW · Q2–Q3 2026 — national expansion</div>
+              <div class="tl-text">Astana, Shymkent, Karaganda, Aktobe rollout. City-specific micro-influencer activations. YouTube documentary short film. Podcast integrations. Performance retargeting on users who consumed content but haven't registered yet.</div>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-left"><div class="tl-dot"></div><div class="tl-line" style="min-height:0"></div></div>
+            <div class="tl-content">
+              <div class="tl-time">PHASE 3: LOYALTY · Q4 2026 – Q2 2027</div>
+              <div class="tl-text">Loyalty multiplier: enhanced cashback for Alaqan payments. Gamification inside Kaspi App. Partner promotions with Magnum, Fix Price, KFC, Starbucks KZ. Goal: TOM #1 in "contactless payment in Kazakhstan."</div>
+            </div>
+          </div>
+        </div>
+        <div class="accent-card" style="margin-top:0.65rem;">
+          <strong>Integration type: Full Omni-channel with Owned Media as the hub</strong>
+          <span>Kaspi App is the central hub. Paid channels drive traffic into it. Earned media (UGC, word-of-mouth, PR) amplifies trust. Consistency rule: the open-palm symbol appears in every touchpoint, in every channel, without exception.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 13: CONSISTENCY CHECK -->
+    <div class="slide">
+      <div class="slide-header">
+        <div class="slide-num">11 · CONSISTENCY</div>
+        <div>
+          <div class="slide-title">Cross-channel consistency check</div>
+          <div class="slide-sub">How we maintain one unified brand voice across all touchpoints</div>
+        </div>
+      </div>
+      <div class="slide-body">
+        <div class="three-col" style="margin-bottom:0.875rem;">
+          <div class="card-sm"><h4>Visual consistency</h4><p>The open palm symbol appears in every touchpoint — terminal screen, app banner, OOH, TikTok frame, push notification icon. One recognizable sign.</p></div>
+          <div class="card-sm"><h4>Message consistency</h4><p>"Everything is in your palm" runs verbatim across all channels. No variation. No dilution. From billboard to push notification — same words, same idea.</p></div>
+          <div class="card-sm"><h4>Tone consistency</h4><p>Bold, warm, Kazakhstani in every format — TikTok caption, Telegram post, OOH headline, in-app copy. Never clinical, never corporate, never cold.</p></div>
+        </div>
+        <div class="two-col">
+          <div>
+            <div class="accent-card">
+              <strong>Kaspi App (owned)</strong>
+              <span>Push: "Your palm is ready — try Alaqan now." Onboarding: clean, 3-step registration, visual of open palm at each step.</span>
+            </div>
+            <div class="accent-card">
+              <strong>TikTok / Instagram (paid + earned)</strong>
+              <span>Native UGC style. First 3 seconds show the "problem" (hands full / no signal). Resolution: palm on terminal. Hashtag: #EverythingInYourPalm</span>
+            </div>
+          </div>
+          <div>
+            <div class="accent-card">
+              <strong>OOH / outdoor (offline)</strong>
+              <span>Headline: "Forget the card." Sub: "Pay with your palm." Visual: open hand on Kaspi-branded terminal. Red + white. Zero clutter.</span>
+            </div>
+            <div class="accent-card">
+              <strong>Retail / terminal (point of sale)</strong>
+              <span>Mini-poster at every terminal: palm icon + "Alaqan accepted here." Sticker on door of participating merchants. Immediate in-store brand recognition.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 14: KPIS -->
+    <div class="slide">
+      <div class="slide-header">
+        <div class="slide-num">12 · KPIs</div>
+        <div>
+          <div class="slide-title">KPIs & success metrics</div>
+          <div class="slide-sub">Brand · digital · business targets across the 18-month campaign</div>
+        </div>
+      </div>
+      <div class="slide-body">
+        <div class="three-col" style="margin-bottom:0.875rem;">
+          <div class="card-sm"><h4>Brand KPIs</h4><p>TOM 25%+ in Almaty at 6 months. Brand awareness 60%+ nationally at 12 months. "Freedom" as top-1 brand attribute in tracking surveys.</p></div>
+          <div class="card-sm"><h4>Digital KPIs</h4><p>TikTok organic reach 5M+ in 3 months. Micro-influencer ER 5%+. App registrations: 500K in year 1. CPR (cost per registration) under 500 KZT.</p></div>
+          <div class="card-sm"><h4>Business KPIs</h4><p>1M+ active Alaqan users by Q4 2026. Transaction frequency: 2+ times/week with core TA. Alaqan NPS above 70.</p></div>
+        </div>
+        <div class="accent-card">
+          <strong>Phase 1 milestones (Q1 2026)</strong>
+          <span>500+ Almaty merchant terminals live. 50K Alaqan registrations in first 30 days. 10 micro-influencer activations published. OOH live at 5+ major Almaty locations. Kaspi App push campaign sent to all Almaty Kaspi Pay users.</span>
+        </div>
+        <div class="accent-card">
+          <strong>Phase 3 success definition (Q2 2027)</strong>
+          <span>Alaqan recognized as synonymous with palm payment in Kazakhstan. Zero need to explain what it is — the open-palm gesture is understood on sight. TOM #1 in contactless payment category nationally, measured by independent brand tracker.</span>
+        </div>
+        <div class="tag-row" style="margin-bottom:0;">
+          <span class="tag tag-green">Monthly: registrations + ER</span>
+          <span class="tag tag-blue">Quarterly: brand awareness tracking</span>
+          <span class="tag tag-amber">Annually: TOM + NPS survey</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 15: TEAM -->
+    <div class="slide">
+      <div class="slide-header">
+        <div class="slide-num">13 · TEAM</div>
+        <div>
+          <div class="slide-title">Meet the team</div>
+          <div class="slide-sub">The people behind this IMC strategy</div>
+        </div>
+      </div>
+      <div class="slide-body">
+        <div style="text-align:center; margin-bottom: 1.25rem;">
+          <div style="display:inline-block; background: var(--kaspi-red); color: white; font-family:'Unbounded',sans-serif; font-size: 18px; font-weight: 700; padding: 10px 28px; border-radius: 12px; letter-spacing: 0.03em;">Team FANTAstic</div>
+          <div style="font-size: 13px; color: var(--color-text-secondary); margin-top: 8px;">Integrated Marketing Communication · Kaspi Alaqan · 2026</div>
+        </div>
+        <div class="member-grid">
+          <div class="member-card">
+            <div class="avatar">IA</div>
+            <div><div class="member-name">Indira Amanova</div><div class="member-role">IMC Strategy & Brand Archetype</div></div>
+          </div>
+          <div class="member-card">
+            <div class="avatar">MA</div>
+            <div><div class="member-name">Meruyert Abdullina</div><div class="member-role">Target Audience & Media Habits</div></div>
+          </div>
+          <div class="member-card">
+            <div class="avatar">AM</div>
+            <div><div class="member-name">Aisha Maden</div><div class="member-role">Creative Message & Channel Plan</div></div>
+          </div>
+          <div class="member-card">
+            <div class="avatar">AB</div>
+            <div><div class="member-name">Arailym Bakytzhankyzy</div><div class="member-role">Influencer Strategy & KPIs</div></div>
+          </div>
+        </div>
+        <div style="margin-top: 1.25rem; padding: 1rem 1.25rem; background: var(--color-background-secondary); border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-tertiary); text-align: center;">
+          <div style="font-size: 12px; color: var(--color-text-secondary); line-height: 1.6;">This IMC strategy was developed as part of the Effective Integrated Marketing Communication course.<br>All research, analysis, and creative solutions are original work by Team FANTAstic.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 16: CONCLUSION -->
+    <div class="slide">
+      <div style="background: var(--kaspi-red); border-radius: var(--slide-radius); padding: 2.25rem 2rem; color: white; min-height: 420px; display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+          <div style="font-size: 10px; letter-spacing: 0.15em; opacity: 0.7; text-transform: uppercase; margin-bottom: 0.5rem;">14 · Conclusion</div>
+          <div style="font-family: 'Unbounded', sans-serif; font-size: 22px; font-weight: 700; line-height: 1.25; margin-bottom: 1rem;">Key takeaways</div>
+          <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+            <div style="background: rgba(255,255,255,0.15); border-radius: 10px; padding: 0.875rem 1.1rem; display: flex; gap: 12px; align-items: flex-start;">
+              <div style="font-family:'Unbounded',sans-serif; font-size:18px; font-weight:700; opacity:0.6; flex-shrink:0; line-height:1;">01</div>
+              <div><div style="font-size:13px; font-weight:500; margin-bottom:3px;">Alaqan is a habit upgrade, not a new product</div><div style="font-size:12px; opacity:0.85; line-height:1.5;">Kaspi already has 13M+ app users. Alaqan is a frictionless extension of an existing daily routine — the lowest-barrier fintech launch in KZ history.</div></div>
+            </div>
+            <div style="background: rgba(255,255,255,0.15); border-radius: 10px; padding: 0.875rem 1.1rem; display: flex; gap: 12px; align-items: flex-start;">
+              <div style="font-family:'Unbounded',sans-serif; font-size:18px; font-weight:700; opacity:0.6; flex-shrink:0; line-height:1;">02</div>
+              <div><div style="font-size:13px; font-weight:500; margin-bottom:3px;">The open palm is the campaign</div><div style="font-size:12px; opacity:0.85; line-height:1.5;">One consistent visual symbol — the open hand — repeated across every channel, every format, every city. Simplicity at scale creates TOM.</div></div>
+            </div>
+            <div style="background: rgba(255,255,255,0.15); border-radius: 10px; padding: 0.875rem 1.1rem; display: flex; gap: 12px; align-items: flex-start;">
+              <div style="font-family:'Unbounded',sans-serif; font-size:18px; font-weight:700; opacity:0.6; flex-shrink:0; line-height:1;">03</div>
+              <div><div style="font-size:13px; font-weight:500; margin-bottom:3px;">Native content beats paid advertising</div><div style="font-size:12px; opacity:0.85; line-height:1.5;">Kazakhstan's 16.9M TikTok users and 90% monthly Instagram reach demand authentic, UGC-style storytelling — not traditional ad formats.</div></div>
+            </div>
+            <div style="background: rgba(255,255,255,0.15); border-radius: 10px; padding: 0.875rem 1.1rem; display: flex; gap: 12px; align-items: flex-start;">
+              <div style="font-family:'Unbounded',sans-serif; font-size:18px; font-weight:700; opacity:0.6; flex-shrink:0; line-height:1;">04</div>
+              <div><div style="font-size:13px; font-weight:500; margin-bottom:3px;">Long-term wins: 18 months, 3 phases, one brand</div><div style="font-size:12px; opacity:0.85; line-height:1.5;">Launch → Grow → Loyalty. Each phase builds on the last. By Q2 2027, Alaqan becomes the default word for palm payment in Kazakhstan.</div></div>
+            </div>
+          </div>
+        </div>
+        <div style="border-top: 1px solid rgba(255,255,255,0.25); padding-top: 1rem; margin-top: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+          <div style="font-family:'Unbounded',sans-serif; font-size:13px; font-weight:700; opacity:0.9;">Team FANTAstic · 2026</div>
+          <div style="font-size:12px; opacity:0.7; font-style:italic;">"Алақандa бәрі бар" — Everything is in your palm</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const dotsEl = document.getElementById('dots');
+  const curEl = document.getElementById('cur');
+  const prevBtn = document.getElementById('prev');
+  const nextBtn = document.getElementById('next');
+  let cur = 0;
+  const total = slides.length;
+  document.getElementById('tot').textContent = total;
+  for (let i = 0; i < total; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.onclick = () => goTo(i);
+    dotsEl.appendChild(d);
+  }
+  function goTo(n) {
+    slides[cur].classList.remove('active');
+    dotsEl.children[cur].classList.remove('active');
+    cur = n;
+    slides[cur].classList.add('active');
+    dotsEl.children[cur].classList.add('active');
+    curEl.textContent = cur + 1;
+    prevBtn.disabled = cur === 0;
+    nextBtn.disabled = cur === total - 1;
+  }
+  function go(dir) { if (cur + dir >= 0 && cur + dir < total) goTo(cur + dir); }
+</script>
